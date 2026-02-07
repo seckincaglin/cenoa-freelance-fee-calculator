@@ -1,0 +1,26 @@
+{
+  "name": "freelance-fee-calculator",
+  "version": "1.0.0",
+  "description": "Calculate real take-home pay for freelancers after platform and payment gateway fees",
+  "main": "web/index.html",
+  "scripts": {
+    "dev": "npx serve web",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel"
+  },
+  "keywords": [
+    "freelance",
+    "calculator",
+    "upwork",
+    "fiverr",
+    "fees",
+    "payment-gateway",
+    "cenoa"
+  ],
+  "author": "Cenoa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cenoa/freelance-fee-calculator"
+  }
+}

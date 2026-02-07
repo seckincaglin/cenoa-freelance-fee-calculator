@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Platform Fee Calculator - Cenoa</title>
+    <meta name="description" content="Calculate your real take-home pay after platform fees, payment gateway fees, and currency conversion. Free tool for freelancers on Upwork, Fiverr, and more.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .header .subtitle {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            opacity: 0.85;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .result-header h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .result-header .take-home {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2ecc71;
+            margin: 10px 0;
+        }
+
+        .result-header .original {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 1.2rem;
+        }
+
+        .breakdown {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .breakdown h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .breakdown-item .label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .breakdown-item .value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .breakdown-item .negative {
+            color: #e74c3c;
+        }
+
+        .breakdown-item .positive {
+            color: #2ecc71;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 40px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .progress-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .progress-segment.take-home {
+            background: #2ecc71;
+        }
+
+        .progress-segment.platform-fee {
+            background: #e74c3c;
+        }
+
+        .progress-segment.gateway-fee {
+            background: #f39c12;
+        }
+
+        .progress-segment.conversion-fee {
+            background: #9b59b6;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .info-box strong {
+            color: #3498db;
+        }
+
+        .platform-info {
+            background: #fff9e6;
+            border-left: 4px solid #f39c12;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .cta-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .cta-box h3 {
+            margin-bottom: 10px;
+        }
+
+        .cta-box a {
+            color: white;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .result-header .take-home {
+                font-size: 2rem;
+            }
+
+            .progress-segment {
+                font-size: 0.7rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Freelance Platform Fee Calculator</h1>
+            <p>Calculate your real take-home pay after all fees</p>
+            <p class="subtitle">For freelancers in Pakistan, Nigeria, Egypt, Turkey & beyond</p>
+        </div>
+
+        <div class="card">
+            <form id="calculator-form">
+                <div class="input-group">
+                    <label for="platform">Select Platform</label>
+                    <select id="platform" required>
+                        <option value="">Choose a platform...</option>
+                        <option value="upwork">Upwork</option>
+                        <option value="fiverr">Fiverr</option>
+                        <option value="freelancer">Freelancer.com</option>
+                        <option value="toptal">Toptal</option>
+                        <option value="peopleperhour">PeoplePerHour</option>
+                        <option value="guru">Guru</option>
+                        <option value="99designs">99designs</option>
+                    </select>
+                    <div id="platform-info"></div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="amount">Project Value</label>
+                        <input type="number" id="amount" placeholder="e.g., 1000" min="1" step="0.01" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="currency">Currency</label>
+                        <select id="currency" required>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="CAD">CAD ($)</option>
+                            <option value="AUD">AUD ($)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="gateway">Payment Gateway</label>
+                        <select id="gateway" required>
+                            <option value="payoneer">Payoneer</option>
+                            <option value="wise">Wise (TransferWise)</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="bank">Direct Bank Transfer</option>
+                            <option value="crypto">Cryptocurrency</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="local-currency">Your Local Currency</label>
+                        <select id="local-currency" required>
+                            <option value="PKR">PKR (Pakistan)</option>
+                            <option value="NGN">NGN (Nigeria)</option>
+                            <option value="EGP">EGP (Egypt)</option>
+                            <option value="TRY">TRY (Turkey)</option>
+                            <option value="USD">USD (Keep USD)</option>
+                            <option value="EUR">EUR (Keep EUR)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit">Calculate Take-Home Pay</button>
+            </form>
+        </div>
+
+        <div class="results" id="results">
+            <div class="card">
+                <div class="result-header">
+                    <h2>Your Take-Home Pay</h2>
+                    <div class="take-home" id="final-amount">$0.00</div>
+                    <div class="original">Original: <span id="original-amount">$0.00</span></div>
+                </div>
+
+                <div class="progress-bar" id="progress-bar"></div>
+                <div class="legend" id="legend"></div>
+
+                <div class="breakdown">
+                    <h3>💸 Fee Breakdown</h3>
+                    <div class="breakdown-item">
+                        <span class="label">Project Value</span>
+                        <span class="value positive" id="project-value">$0.00</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="label" id="platform-fee-label">Platform Fee</span>
+                        <span class="value negative" id="platform-fee">-$0.00</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="label" id="gateway-fee-label">Payment Gateway Fee</span>
+                        <span class="value negative" id="gateway-fee">-$0.00</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="label" id="conversion-fee-label">Currency Conversion Fee</span>
+                        <span class="value negative" id="conversion-fee">-$0.00</span>
+                    </div>
+                    <div class="breakdown-item" style="border-top: 2px solid #333; padding-top: 12px; margin-top: 8px;">
+                        <span class="label" style="font-size: 1.1rem; color: #333;">Net Take-Home</span>
+                        <span class="value positive" style="font-size: 1.2rem;" id="net-amount">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Pro Tip:</strong> <span id="pro-tip"></span>
+                </div>
+
+                <div class="cta-box">
+                    <h3>🔍 Next Step: Check Payment Gateway Fees</h3>
+                    <p>Want to dive deeper into payment gateway fees and find the best option?</p>
+                    <a href="https://cenoa.com/tools/payment-gateway-checker" target="_blank">Try our Payment Gateway Checker →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Built with ❤️ by <a href="https://cenoa.com" target="_blank">Cenoa</a></p>
+            <p style="margin-top: 8px; font-size: 0.85rem;">Helping freelancers worldwide understand their real earnings</p>
+        </div>
+    </div>
+
+    <script>
+        // Platform fee structures
+        const platforms = {
+            upwork: {
+                name: 'Upwork',
+                info: 'Upwork uses a sliding fee: 20% for lifetime billings up to $500, 10% for $500-$10,000, and 5% over $10,000 (per client).',
+                calculate: (amount) => {
+                    if (amount <= 500) return amount * 0.20;
+                    if (amount <= 10000) return 100 + (amount - 500) * 0.10;
+                    return 100 + 950 + (amount - 10000) * 0.05;
+                }
+            },
+            fiverr: {
+                name: 'Fiverr',
+                info: 'Fiverr charges a flat 20% service fee on all earnings.',
+                calculate: (amount) => amount * 0.20
+            },
+            freelancer: {
+                name: 'Freelancer.com',
+                info: 'Freelancer.com charges 10% or $5 USD, whichever is greater.',
+                calculate: (amount) => Math.max(amount * 0.10, 5)
+            },
+            toptal: {
+                name: 'Toptal',
+                info: 'Toptal doesn\'t charge freelancers fees - the client pays all fees!',
+                calculate: (amount) => 0
+            },
+            peopleperhour: {
+                name: 'PeoplePerHour',
+                info: 'PeoplePerHour charges 20% service fee on all earnings.',
+                calculate: (amount) => amount * 0.20
+            },
+            guru: {
+                name: 'Guru',
+                info: 'Guru charges between 5-9% depending on your membership level (assuming 9% for basic).',
+                calculate: (amount) => amount * 0.09
+            },
+            '99designs': {
+                name: '99designs',
+                info: '99designs takes a 15% platform fee from designer earnings.',
+                calculate: (amount) => amount * 0.15
+            }
+        };
+
+        // Payment gateway fees
+        const gateways = {
+            payoneer: {
+                name: 'Payoneer',
+                fee: 0.02, // 2%
+                info: 'Typically 2% for receiving payments'
+            },
+            wise: {
+                name: 'Wise',
+                fee: 0.01, // ~1%
+                info: 'Around 0.5-1% depending on currency'
+            },
+            paypal: {
+                name: 'PayPal',
+                fee: 0.029, // 2.9% + fixed fee
+                info: 'Typically 2.9% + fixed fee (simplified to 3%)',
+                calculate: (amount) => amount * 0.03 + 0.30
+            },
+            bank: {
+                name: 'Direct Bank Transfer',
+                fee: 0.01, // ~1%
+                info: 'Usually 0-2% depending on bank'
+            },
+            crypto: {
+                name: 'Cryptocurrency',
+                fee: 0.005, // 0.5%
+                info: 'Network fees vary (0.5-2%)'
+            }
+        };
+
+        // Currency conversion fees (approximate)
+        const conversionFees = {
+            PKR: 0.02, // 2%
+            NGN: 0.025, // 2.5%
+            EGP: 0.02, // 2%
+            TRY: 0.015, // 1.5%
+            USD: 0,
+            EUR: 0
+        };
+
+        // Currency symbols
+        const currencySymbols = {
+            USD: '$',
+            EUR: '€',
+            GBP: '£',
+            CAD: 'C$',
+            AUD: 'A$',
+            PKR: '₨',
+            NGN: '₦',
+            EGP: 'E£',
+            TRY: '₺'
+        };
+
+        // Update platform info when platform is selected
+        document.getElementById('platform').addEventListener('change', function() {
+            const platformKey = this.value;
+            const infoDiv = document.getElementById('platform-info');
+            
+            if (platformKey && platforms[platformKey]) {
+                infoDiv.innerHTML = `<div class="platform-info">ℹ️ ${platforms[platformKey].info}</div>`;
+            } else {
+                infoDiv.innerHTML = '';
+            }
+        });
+
+        // Form submission
+        document.getElementById('calculator-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateFees();
+        });
+
+        function calculateFees() {
+            const platformKey = document.getElementById('platform').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const currency = document.getElementById('currency').value;
+            const gatewayKey = document.getElementById('gateway').value;
+            const localCurrency = document.getElementById('local-currency').value;
+
+            if (!platformKey || !amount || !gatewayKey) return;
+
+            const platform = platforms[platformKey];
+            const gateway = gateways[gatewayKey];
+            const symbol = currencySymbols[currency];
+
+            // Calculate fees
+            const platformFee = platform.calculate(amount);
+            const afterPlatformFee = amount - platformFee;
+
+            let gatewayFee;
+            if (gateway.calculate) {
+                gatewayFee = gateway.calculate(afterPlatformFee);
+            } else {
+                gatewayFee = afterPlatformFee * gateway.fee;
+            }
+
+            const afterGatewayFee = afterPlatformFee - gatewayFee;
+
+            const conversionRate = currency === localCurrency ? 0 : (conversionFees[localCurrency] || 0);
+            const conversionFee = afterGatewayFee * conversionRate;
+
+            const finalAmount = afterGatewayFee - conversionFee;
+
+            // Calculate percentages for visualization
+            const platformPct = (platformFee / amount) * 100;
+            const gatewayPct = (gatewayFee / amount) * 100;
+            const conversionPct = (conversionFee / amount) * 100;
+            const takeHomePct = (finalAmount / amount) * 100;
+
+            // Update UI
+            document.getElementById('original-amount').textContent = `${symbol}${amount.toFixed(2)}`;
+            document.getElementById('final-amount').textContent = `${symbol}${finalAmount.toFixed(2)}`;
+            
+            document.getElementById('project-value').textContent = `${symbol}${amount.toFixed(2)}`;
+            document.getElementById('platform-fee-label').textContent = `${platform.name} Fee (${platformPct.toFixed(1)}%)`;
+            document.getElementById('platform-fee').textContent = `-${symbol}${platformFee.toFixed(2)}`;
+            document.getElementById('gateway-fee-label').textContent = `${gateway.name} Fee (${gatewayPct.toFixed(1)}%)`;
+            document.getElementById('gateway-fee').textContent = `-${symbol}${gatewayFee.toFixed(2)}`;
+            
+            if (conversionFee > 0) {
+                document.getElementById('conversion-fee-label').textContent = `Conversion Fee (${conversionPct.toFixed(1)}%)`;
+                document.getElementById('conversion-fee').textContent = `-${symbol}${conversionFee.toFixed(2)}`;
+                document.getElementById('conversion-fee').parentElement.style.display = 'flex';
+            } else {
+                document.getElementById('conversion-fee').parentElement.style.display = 'none';
+            }
+            
+            document.getElementById('net-amount').textContent = `${symbol}${finalAmount.toFixed(2)}`;
+
+            // Update progress bar
+            updateProgressBar(takeHomePct, platformPct, gatewayPct, conversionPct);
+
+            // Update pro tip
+            updateProTip(platformKey, gatewayKey, takeHomePct);
+
+            // Show results
+            document.getElementById('results').classList.add('visible');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function updateProgressBar(takeHomePct, platformPct, gatewayPct, conversionPct) {
+            const progressBar = document.getElementById('progress-bar');
+            const legend = document.getElementById('legend');
+
+            let html = '';
+            if (takeHomePct > 3) {
+                html += `<div class="progress-segment take-home" style="width: ${takeHomePct}%">${takeHomePct.toFixed(1)}%</div>`;
+            } else {
+                html += `<div class="progress-segment take-home" style="width: ${takeHomePct}%"></div>`;
+            }
+            
+            if (platformPct > 3) {
+                html += `<div class="progress-segment platform-fee" style="width: ${platformPct}%">${platformPct.toFixed(1)}%</div>`;
+            } else if (platformPct > 0) {
+                html += `<div class="progress-segment platform-fee" style="width: ${platformPct}%"></div>`;
+            }
+            
+            if (gatewayPct > 3) {
+                html += `<div class="progress-segment gateway-fee" style="width: ${gatewayPct}%">${gatewayPct.toFixed(1)}%</div>`;
+            } else if (gatewayPct > 0) {
+                html += `<div class="progress-segment gateway-fee" style="width: ${gatewayPct}%"></div>`;
+            }
+            
+            if (conversionPct > 3) {
+                html += `<div class="progress-segment conversion-fee" style="width: ${conversionPct}%">${conversionPct.toFixed(1)}%</div>`;
+            } else if (conversionPct > 0) {
+                html += `<div class="progress-segment conversion-fee" style="width: ${conversionPct}%"></div>`;
+            }
+
+            progressBar.innerHTML = html;
+
+            // Update legend
+            let legendHtml = `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2ecc71;"></div>
+                    <span>Take-Home (${takeHomePct.toFixed(1)}%)</span>
+                </div>
+            `;
+            
+            if (platformPct > 0) {
+                legendHtml += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e74c3c;"></div>
+                        <span>Platform Fee (${platformPct.toFixed(1)}%)</span>
+                    </div>
+                `;
+            }
+            
+            if (gatewayPct > 0) {
+                legendHtml += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f39c12;"></div>
+                        <span>Gateway Fee (${gatewayPct.toFixed(1)}%)</span>
+                    </div>
+                `;
+            }
+            
+            if (conversionPct > 0) {
+                legendHtml += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #9b59b6;"></div>
+                        <span>Conversion Fee (${conversionPct.toFixed(1)}%)</span>
+                    </div>
+                `;
+            }
+
+            legend.innerHTML = legendHtml;
+        }
+
+        function updateProTip(platformKey, gatewayKey, takeHomePct) {
+            const tips = {
+                upwork_low: 'On Upwork, try to build long-term relationships with clients. Once you bill over $10,000 with a client, your fee drops to just 5%!',
+                fiverr: 'Fiverr\'s 20% fee is steep. Consider upselling services and packages to maximize your earnings per order.',
+                toptal: 'Great choice! Toptal doesn\'t charge freelancers any fees. This is one of the best platforms for take-home pay.',
+                wise: 'Wise is one of the cheapest payment gateways. You\'re minimizing your withdrawal fees!',
+                paypal: 'PayPal has higher fees. Consider switching to Wise or Payoneer to save 1-2% on every withdrawal.',
+                crypto: 'Crypto can be cheaper, but watch out for network fees during high congestion. Timing matters!',
+                general_low: `You're taking home ${takeHomePct.toFixed(1)}% of your earnings. Look for ways to reduce platform and gateway fees.`,
+                general_good: `Not bad! You're keeping ${takeHomePct.toFixed(1)}% of your earnings. Every percentage point matters over time.`
+            };
+
+            let tip = '';
+            
+            if (platformKey === 'toptal') {
+                tip = tips.toptal;
+            } else if (platformKey === 'upwork' && takeHomePct < 75) {
+                tip = tips.upwork_low;
+            } else if (platformKey === 'fiverr') {
+                tip = tips.fiverr;
+            } else if (gatewayKey === 'wise') {
+                tip = tips.wise;
+            } else if (gatewayKey === 'paypal') {
+                tip = tips.paypal;
+            } else if (gatewayKey === 'crypto') {
+                tip = tips.crypto;
+            } else if (takeHomePct < 70) {
+                tip = tips.general_low;
+            } else {
+                tip = tips.general_good;
+            }
+
+            document.getElementById('pro-tip').textContent = tip;
+        }
+
+        // Auto-calculate on any input change after first submission
+        let hasCalculated = false;
+        document.getElementById('calculator-form').addEventListener('input', function() {
+            if (hasCalculated) {
+                const form = document.getElementById('calculator-form');
+                if (form.checkValidity()) {
+                    calculateFees();
+                }
+            }
+        });
+
+        document.getElementById('calculator-form').addEventListener('submit', function() {
+            hasCalculated = true;
+        });
+    </script>
+</body>
+</html>
